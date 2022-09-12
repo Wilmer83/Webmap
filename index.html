@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <style>
+        #map {
+            width: 1141px;
+            height: 532px;
+        }
+        </style>
+        <title>Mapa Catastral</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/TERRENO_3116_1.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:20, minZoom:9
+        }).fitBounds([[7.791715374910069,-72.57771348238397],[7.851102161636197,-72.45008791619328]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            map.setMaxBounds(map.getBounds());
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 9,
+            maxZoom: 20,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_TERRENO_3116_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Codigo de lote</th>\
+                        <td>' + (feature.properties['CODIGO'] !== null ? autolinker.link(feature.properties['CODIGO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Codigo de manzana</th>\
+                        <td>' + (feature.properties['MANZANA_CO'] !== null ? autolinker.link(feature.properties['MANZANA_CO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Nombre de propietario</th>\
+                        <td>' + (feature.properties['NOMB_PROP'] !== null ? autolinker.link(feature.properties['NOMB_PROP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Facha de compra</th>\
+                        <td>' + (feature.properties['FECHA_COMP'] !== null ? autolinker.link(feature.properties['FECHA_COMP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Facha de construccion</th>\
+                        <td>' + (feature.properties['FECH_CONST'] !== null ? autolinker.link(feature.properties['FECH_CONST'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Identificacion de propietario</th>\
+                        <td>' + (feature.properties['PROP_ID'] !== null ? autolinker.link(feature.properties['PROP_ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Area en m2</th>\
+                        <td>' + (feature.properties['area_m2'] !== null ? autolinker.link(feature.properties['area_m2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Perimetro</th>\
+                        <td>' + (feature.properties['perim_m'] !== null ? autolinker.link(feature.properties['perim_m'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_TERRENO_3116_1_0() {
+            return {
+                pane: 'pane_TERRENO_3116_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(251,228,55,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_TERRENO_3116_1');
+        map.getPane('pane_TERRENO_3116_1').style.zIndex = 401;
+        map.getPane('pane_TERRENO_3116_1').style['mix-blend-mode'] = 'normal';
+        var layer_TERRENO_3116_1 = new L.geoJson(json_TERRENO_3116_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_TERRENO_3116_1',
+            layerName: 'layer_TERRENO_3116_1',
+            pane: 'pane_TERRENO_3116_1',
+            onEachFeature: pop_TERRENO_3116_1,
+            style: style_TERRENO_3116_1_0,
+        });
+        bounds_group.addLayer(layer_TERRENO_3116_1);
+        map.addLayer(layer_TERRENO_3116_1);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>Mapa Catastral</h2>';
+            };
+            title.addTo(map);
+            var abstract = new L.Control({'position':'bottomright'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+
+                    abstract.show();
+                    return this._div;
+                };
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = 'Mapa creado con qgis2web';
+            };
+            abstract.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/TERRENO_3116_1.png" /> TERRENO_3116': layer_TERRENO_3116_1,"OSM Standard": layer_OSMStandard_0,}).addTo(map);
+        setBounds();
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"FECH_CONST": "date","FECHA_COMP": "date","area_m2": "real"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_FECH_CONST_date1 = document.createElement("div");
+            div_FECH_CONST_date1.id = "div_FECH_CONST_date1";
+            div_FECH_CONST_date1.className= "filterselect";
+            document.getElementById("menu").appendChild(div_FECH_CONST_date1);
+            dat_FECH_CONST_date1 = document.createElement('input');
+            dat_FECH_CONST_date1.type = "text";
+            dat_FECH_CONST_date1.id = "dat_FECH_CONST_date1";
+            div_FECH_CONST_date1.appendChild(dat_FECH_CONST_date1);
+            var lab_FECH_CONST_date1 = document.createElement('div');
+            lab_FECH_CONST_date1.innerHTML  = 'FECH_CONST from';
+            lab_FECH_CONST_date1.className = 'filterlabel';
+            document.getElementById("div_FECH_CONST_date1").appendChild(
+                lab_FECH_CONST_date1);
+            var reset_FECH_CONST_date1 = document.createElement('div');
+            reset_FECH_CONST_date1.innerHTML = "clear";
+            reset_FECH_CONST_date1.className = 'filterlabel';
+            reset_FECH_CONST_date1.onclick = function() {
+                tail.DateTime("#dat_FECH_CONST_date1", {
+                    dateStart: 315550800000,
+                    dateEnd: 944024400000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(1980,1-1,1,0,0,0);
+                tail.DateTime("#dat_FECH_CONST_date1").reload()
+            }
+            document.getElementById("div_FECH_CONST_date1").appendChild(
+                reset_FECH_CONST_date1);
+            document.addEventListener("DOMContentLoaded", function(){
+                tail.DateTime("#dat_FECH_CONST_date1", {
+                    dateStart: 315550800000,
+                    dateEnd: 944024400000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(1980,1-1,1,0,0,0);
+                tail.DateTime("#dat_FECH_CONST_date1").reload()
+                tail.DateTime("#dat_FECH_CONST_date2", {
+                    dateStart: 315550800000,
+                    dateEnd: 944024400000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(1999,12-1,1,0,0,0);
+                tail.DateTime("#dat_FECH_CONST_date2").reload()
+                filterFunc()
+                dat_FECH_CONST_date1.onchange = function(){filterFunc()};
+                dat_FECH_CONST_date2.onchange = function(){filterFunc()};
+            });
+            var div_FECH_CONST_date2 = document.createElement("div");
+            div_FECH_CONST_date2.id = "div_FECH_CONST_date2";
+            div_FECH_CONST_date2.className= "filterselect";
+            document.getElementById("menu").appendChild(div_FECH_CONST_date2);
+            dat_FECH_CONST_date2 = document.createElement('input');
+            dat_FECH_CONST_date2.type = "text";
+            dat_FECH_CONST_date2.id = "dat_FECH_CONST_date2";
+            div_FECH_CONST_date2.appendChild(dat_FECH_CONST_date2);
+            var lab_FECH_CONST_date2 = document.createElement('div');
+            lab_FECH_CONST_date2.innerHTML  = 'FECH_CONST till';
+            lab_FECH_CONST_date2.className = 'filterlabel';
+            document.getElementById("div_FECH_CONST_date2")
+              .appendChild(lab_FECH_CONST_date2);
+            var reset_FECH_CONST_date2 = document.createElement('div');
+            reset_FECH_CONST_date2.innerHTML = "clear";
+            reset_FECH_CONST_date2.className = 'filterlabel';
+            reset_FECH_CONST_date2.onclick = function() {
+                tail.DateTime("#dat_FECH_CONST_date2", {
+                    dateStart: 315550800000,
+                    dateEnd: 944024400000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(1999,12-1,1,0,0,0);
+                tail.DateTime("#dat_FECH_CONST_date2").reload()
+            }
+            document.getElementById("div_FECH_CONST_date2").appendChild(
+                reset_FECH_CONST_date2);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_FECHA_COMP_date1 = document.createElement("div");
+            div_FECHA_COMP_date1.id = "div_FECHA_COMP_date1";
+            div_FECHA_COMP_date1.className= "filterselect";
+            document.getElementById("menu").appendChild(div_FECHA_COMP_date1);
+            dat_FECHA_COMP_date1 = document.createElement('input');
+            dat_FECHA_COMP_date1.type = "text";
+            dat_FECHA_COMP_date1.id = "dat_FECHA_COMP_date1";
+            div_FECHA_COMP_date1.appendChild(dat_FECHA_COMP_date1);
+            var lab_FECHA_COMP_date1 = document.createElement('div');
+            lab_FECHA_COMP_date1.innerHTML  = 'FECHA_COMP from';
+            lab_FECHA_COMP_date1.className = 'filterlabel';
+            document.getElementById("div_FECHA_COMP_date1").appendChild(
+                lab_FECHA_COMP_date1);
+            var reset_FECHA_COMP_date1 = document.createElement('div');
+            reset_FECHA_COMP_date1.innerHTML = "clear";
+            reset_FECHA_COMP_date1.className = 'filterlabel';
+            reset_FECHA_COMP_date1.onclick = function() {
+                tail.DateTime("#dat_FECHA_COMP_date1", {
+                    dateStart: 946789200000,
+                    dateEnd: 1514610000000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(2000,1-1,2,0,0,0);
+                tail.DateTime("#dat_FECHA_COMP_date1").reload()
+            }
+            document.getElementById("div_FECHA_COMP_date1").appendChild(
+                reset_FECHA_COMP_date1);
+            document.addEventListener("DOMContentLoaded", function(){
+                tail.DateTime("#dat_FECHA_COMP_date1", {
+                    dateStart: 946789200000,
+                    dateEnd: 1514610000000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(2000,1-1,2,0,0,0);
+                tail.DateTime("#dat_FECHA_COMP_date1").reload()
+                tail.DateTime("#dat_FECHA_COMP_date2", {
+                    dateStart: 946789200000,
+                    dateEnd: 1514610000000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(2017,12-1,30,0,0,0);
+                tail.DateTime("#dat_FECHA_COMP_date2").reload()
+                filterFunc()
+                dat_FECHA_COMP_date1.onchange = function(){filterFunc()};
+                dat_FECHA_COMP_date2.onchange = function(){filterFunc()};
+            });
+            var div_FECHA_COMP_date2 = document.createElement("div");
+            div_FECHA_COMP_date2.id = "div_FECHA_COMP_date2";
+            div_FECHA_COMP_date2.className= "filterselect";
+            document.getElementById("menu").appendChild(div_FECHA_COMP_date2);
+            dat_FECHA_COMP_date2 = document.createElement('input');
+            dat_FECHA_COMP_date2.type = "text";
+            dat_FECHA_COMP_date2.id = "dat_FECHA_COMP_date2";
+            div_FECHA_COMP_date2.appendChild(dat_FECHA_COMP_date2);
+            var lab_FECHA_COMP_date2 = document.createElement('div');
+            lab_FECHA_COMP_date2.innerHTML  = 'FECHA_COMP till';
+            lab_FECHA_COMP_date2.className = 'filterlabel';
+            document.getElementById("div_FECHA_COMP_date2")
+              .appendChild(lab_FECHA_COMP_date2);
+            var reset_FECHA_COMP_date2 = document.createElement('div');
+            reset_FECHA_COMP_date2.innerHTML = "clear";
+            reset_FECHA_COMP_date2.className = 'filterlabel';
+            reset_FECHA_COMP_date2.onclick = function() {
+                tail.DateTime("#dat_FECHA_COMP_date2", {
+                    dateStart: 946789200000,
+                    dateEnd: 1514610000000,
+                    dateFormat: 'YYYY-mm-dd',
+                    timeFormat: false,
+                    today: false,
+                    weekStart: 1,
+                    position: "left",
+                    closeButton: true,
+                    timeStepMinutes:1,
+                    timeStepSeconds: 1
+                }).selectDate(2017,12-1,30,0,0,0);
+                tail.DateTime("#dat_FECHA_COMP_date2").reload()
+            }
+            document.getElementById("div_FECHA_COMP_date2").appendChild(
+                reset_FECHA_COMP_date2);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_area_m2 = document.createElement("div");
+            div_area_m2.id = "div_area_m2";
+            div_area_m2.className = "slider";
+            document.getElementById("menu").appendChild(div_area_m2);
+            var lab_area_m2 = document.createElement('div');
+            lab_area_m2.innerHTML  = 'area_m2: <span id="val_area_m2"></span>';
+            lab_area_m2.className = 'filterlabel';
+            document.getElementById("menu").appendChild(lab_area_m2);
+            var reset_area_m2 = document.createElement('div');
+            reset_area_m2.innerHTML = 'clear filter';
+            reset_area_m2.className = 'filterlabel';
+            lab_area_m2.className = 'filterlabel';
+            reset_area_m2.onclick = function() {
+                sel_area_m2.noUiSlider.reset();
+            };
+            document.getElementById("menu").appendChild(reset_area_m2);
+            var sel_area_m2 = document.getElementById('div_area_m2');
+            noUiSlider.create(sel_area_m2, {
+                connect: true,
+                start: [0.005, 77684.88],
+                range: {
+                min: 0.005,
+                max: 77684.88
+                }
+            });
+            sel_area_m2.noUiSlider.on('update', function (values) {
+            val_area_m2 = document.getElementById('val_area_m2');
+            val_area_m2.innerHTML = values.join(' - ');
+                filterFunc()
+            });
+        </script>
+    </body>
+</html>
